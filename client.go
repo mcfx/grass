@@ -45,6 +45,8 @@ type ListenInfo struct {
 type ClientConfig struct {
 	Id                   uint32
 	Key                  []byte
+	InterfaceName        string
+	MTU                  int
 	IPv4                 uint32
 	IPv4Gateway          uint32
 	IPv4Mask             uint32
@@ -516,11 +518,11 @@ func (client *Client) Start() error {
 		for i := 0; i < len(client.Config.IPv4DNS); i++ {
 			tmpDNS = append(tmpDNS, Uint32ToIP(client.Config.IPv4DNS[i]).String())
 		}
-		tun, err := tun.OpenTunDevice("tun0", tmpIP, tmpGW, tmpMask, tmpDNS)
+		tun, err := tun.OpenTunDevice(client.Config.InterfaceName, tmpIP, tmpGW, tmpMask, tmpDNS, client.Config.MTU)
 		if err != nil {
 			return err
 		}
-		client.Tun = network.New(tun, client.HandleTunIPv4)
+		client.Tun = network.New(tun, client.Config.MTU, client.HandleTunIPv4)
 		go client.Tun.Run()
 	}
 

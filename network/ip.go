@@ -67,7 +67,7 @@ func GenFragments(first *packet.IPv4, offset uint16, data []byte) []*ipPacket {
 			frag.Payload = data
 		} else {
 			frag.Flags = 1
-			offset += (MTU - 20) / 8
+			offset += uint16((MTU - 20) / 8)
 			frag.Payload = data[:MTU-20]
 			data = data[MTU-20:]
 		}

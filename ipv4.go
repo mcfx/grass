@@ -91,13 +91,11 @@ func (client *Client) HandleFinalIPv4(pkt PacketIPv4) error {
 			return client.HandleTunIPv4(icmp4.Wire, icmp4.Ip)
 		}
 	}
-	// TTL should be edited here, but I'm too lazy now
-	client.Tun.WriteCh <- pkt.Data
-	/*pkt.IPPacket.TTL = pkt.TTL
+	pkt.IPPacket.TTL = pkt.TTL
 	packets := network.GenFragments(pkt.IPPacket, 0, pkt.IPPacket.Payload)
 	for i := 0; i < len(packets); i++ {
 		client.Tun.WriteCh <- packets[i]
-	}*/
+	}
 	return nil
 }
 

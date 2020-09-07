@@ -246,7 +246,7 @@ func GenDiffPacketClients(cur, old OtherClientsInfo) (PacketClients, bool) {
 			pkt.Latency[i].Val = oc.Latency
 		}
 		useful = useful || pkt.ConnInfo[i].Ok || pkt.IPv4[i].Ok || pkt.Latency[i].Ok
-		i += 1
+		i++
 	}
 	return pkt, useful
 }

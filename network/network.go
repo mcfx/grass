@@ -8,9 +8,7 @@ import (
 	"github.com/mcfx0/grass/network/packet"
 )
 
-const (
-	MTU = 1500
-)
+var MTU int = 1500
 
 type TunHandler struct {
 	dev io.ReadWriteCloser
@@ -21,15 +19,19 @@ type TunHandler struct {
 	wg sync.WaitGroup
 
 	handler func([]byte, *packet.IPv4) error
+
+	mtu int
 }
 
-func New(dev io.ReadWriteCloser, handler func([]byte, *packet.IPv4) error) *TunHandler {
+func New(dev io.ReadWriteCloser, mtu int, handler func([]byte, *packet.IPv4) error) *TunHandler {
 	th := &TunHandler{
 		dev:          dev,
 		writerStopCh: make(chan bool, 10),
 		WriteCh:      make(chan interface{}, 10000),
 		handler:      handler,
+		mtu:          mtu,
 	}
+	MTU = mtu // ugly implementation
 	return th
 }
 
@@ -57,7 +59,7 @@ func (th *TunHandler) Run() {
 	}()
 
 	// reader
-	var buf [MTU]byte
+	buf := make([]byte, MTU)
 	var ip packet.IPv4
 
 	th.wg.Add(1)
@@ -77,13 +79,16 @@ func (th *TunHandler) Run() {
 			continue
 		}
 
-		//go th.handler(data, &ip)
-		th.handler(data, &ip)
-		/*go func() {
-			err := th.handler(data, &ip)
-			if err != nil {
-				log.Printf("ipv4 error: %v\n", err)
+		if ip.Flags&0x1 != 0 || ip.FragOffset != 0 {
+			last, pkt, raw := procFragment(&ip, data)
+			if last {
+				ip = *pkt
+				data = raw
+			} else {
+				continue
 			}
-		}()*/
+		}
+
+		th.handler(data, &ip)
 	}
 }

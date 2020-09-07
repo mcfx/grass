@@ -149,7 +149,10 @@ func getTuntapComponentId() (string, error) {
 	return "", errors.New("not found component id")
 }
 
-func OpenTunDevice(name, addr, gw, mask string, dns []string) (io.ReadWriteCloser, error) {
+func OpenTunDevice(name, addr, gw, mask string, dns []string, mtu int) (io.ReadWriteCloser, error) {
+	if mtu != 1500 {
+		return nil, errors.New("currently mtu must be 1500 on Windows")
+	}
 	componentId, err := getTuntapComponentId()
 	if err != nil {
 		return nil, err

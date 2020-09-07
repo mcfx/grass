@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strconv"
 	"syscall"
 	"unsafe"
 )
@@ -51,7 +52,7 @@ func (dev *utunDev) Close() error {
 
 var sockaddrCtlSize uintptr = 32
 
-func OpenTunDevice(name, addr, gw, mask string, dns []string) (io.ReadWriteCloser, error) {
+func OpenTunDevice(name, addr, gw, mask string, dns []string, mtu int) (io.ReadWriteCloser, error) {
 	fd, err := syscall.Socket(syscall.AF_SYSTEM, syscall.SOCK_DGRAM, 2)
 	if err != nil {
 		return nil, err
@@ -91,7 +92,7 @@ func OpenTunDevice(name, addr, gw, mask string, dns []string) (io.ReadWriteClose
 	if errno != 0 {
 		return nil, fmt.Errorf("error in syscall.Syscall6(syscall.SYS_GETSOCKOPT, ...): %v", errno)
 	}
-	cmd := exec.Command("ifconfig", string(ifName.name[:ifNameSize-1]), "inet", addr, gw, "netmask", mask, "mtu", "1300", "up")
+	cmd := exec.Command("ifconfig", string(ifName.name[:ifNameSize-1]), "inet", addr, gw, "netmask", mask, "mtu", strconv.FormatInt(int64(mtu), 10), "up")
 	err = cmd.Run()
 	if err != nil {
 		syscall.Close(fd)
