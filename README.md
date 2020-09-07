@@ -12,6 +12,8 @@ Sample config:
 {
     "Id": 114514, // some random number
     "Key": "some_key111", // pre-shared key
+    "InterfaceName": "tun233",
+    "MTU": 5800,
     "IPv4": "10.56.0.2", // ipv4 for this client, ipv6 support will be added soon
     "IPv4Gateway": "10.56.0.1", // ipv4 gateway, in fact useless
     "IPv4Mask": "255.255.255.0",
